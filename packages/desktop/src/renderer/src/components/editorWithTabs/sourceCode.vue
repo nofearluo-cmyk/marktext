@@ -45,6 +45,8 @@ const tabId = ref<string | null>(null)
 const { theme, sourceCode } = storeToRefs(preferencesStore)
 const { currentFile: currentTab } = storeToRefs(editorStore)
 
+const SOURCE_CODE_VIEWPORT_MARGIN = 1000
+
 const isValidMuyaIndexCursor = (cursor: unknown): cursor is MuyaIndexCursorLike => {
   const c = cursor as MuyaIndexCursorLike | null | undefined
   return !!(c && c.anchor && c.focus)
@@ -204,6 +206,18 @@ const handleSelectAll = () => {
   }
 }
 
+const handleSourceCodeWheel = (event: WheelEvent) => {
+  const scroller = editor.value?.getScrollerElement?.() as HTMLElement | null | undefined
+  const target = event.target
+  if (!scroller || !(target instanceof Node) || scroller.contains(target)) {
+    return
+  }
+
+  scroller.scrollLeft += event.deltaX
+  scroller.scrollTop += event.deltaY
+  event.preventDefault()
+}
+
 interface ImageActionPayload {
   id: string
   result: string
@@ -305,7 +319,7 @@ onMounted(() => {
     lineWrapping: true,
     styleActiveLine: true,
     direction: textDirection,
-    viewportMargin: Infinity,
+    viewportMargin: SOURCE_CODE_VIEWPORT_MARGIN,
     lineNumberFormatter (line: number) {
       if (line % 10 === 0 || line === 1) {
         return line
@@ -350,6 +364,7 @@ onMounted(() => {
 
   editor.value = codeMirrorInstance
   tabId.value = id
+  sourceCodeContainer.value?.addEventListener('wheel', handleSourceCodeWheel, { passive: false })
 
   listenChange()
 })
@@ -363,6 +378,7 @@ onBeforeUnmount(() => {
   bus.off('file-changed', handleFileChange)
   bus.off('selectAll', handleSelectAll)
   bus.off('image-action', handleImageAction)
+  sourceCodeContainer.value?.removeEventListener('wheel', handleSourceCodeWheel)
 
   const { cursor, markdown: newMarkdown } = getMarkdownAndCursor(editor.value)
   bus.emit('file-changed', {
@@ -378,11 +394,12 @@ onBeforeUnmount(() => {
 .source-code {
   height: calc(100vh - var(--titleBarHeight));
   box-sizing: border-box;
-  overflow: auto;
+  overflow: hidden;
+  padding: 50px 0;
 }
 .source-code .CodeMirror {
-  height: auto;
-  margin: 50px auto;
+  height: 100%;
+  margin: 0 auto;
   max-width: var(--editorAreaWidth);
   background: transparent;
 }
