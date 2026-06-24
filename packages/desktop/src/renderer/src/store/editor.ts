@@ -2,6 +2,7 @@ import equal from 'deep-equal'
 import bus from '../bus'
 import { getUniqueId, deepClone } from '../util'
 import listToTree, { type ListItem, type TreeNode } from '../util/listToTree'
+import { trailingThrottle } from '../util/trailingThrottle'
 import {
   createDocumentState,
   getOptionsFromState,
@@ -132,6 +133,7 @@ export interface EditorState {
 }
 
 const autoSaveTimers = new Map<string, ReturnType<typeof setTimeout>>()
+const SELECTION_MENU_IPC_THROTTLE_MS = 100
 
 export const useEditorStore = defineStore('editor', {
   state: (): EditorState => ({
@@ -1448,12 +1450,10 @@ export const useEditorStore = defineStore('editor', {
         }
       }
 
-      const { windowId } = window.marktext?.env ?? { windowId: -1 }
-      window.electron.ipcRenderer.send(
-        'mt::editor-selection-changed',
-        windowId,
-        createApplicationMenuState(changes)
-      )
+      const fileId = this.currentFile?.id
+      if (fileId) {
+        sendSelectionMenuState(fileId, changes)
+      }
     },
 
     // Persist the caret for a tab without the heavy content-change pipeline. A
@@ -1891,6 +1891,19 @@ const createApplicationMenuState = ({
   }
   return state
 }
+
+const sendSelectionMenuState = trailingThrottle((fileId: string, changes: SelectionChange) => {
+  const editorStore = useEditorStore()
+  const preferencesStore = usePreferencesStore()
+  if (preferencesStore.sourceCode || editorStore.currentFile?.id !== fileId) return
+
+  const { windowId } = window.marktext?.env ?? { windowId: -1 }
+  window.electron.ipcRenderer.send(
+    'mt::editor-selection-changed',
+    windowId,
+    createApplicationMenuState(changes)
+  )
+}, SELECTION_MENU_IPC_THROTTLE_MS)
 
 /**
  * Creates a object that contains the formats selection state.
