@@ -142,6 +142,7 @@ export interface EditorState {
 
 const autoSaveTimers = new Map<string, ReturnType<typeof setTimeout>>()
 const SELECTION_MENU_IPC_THROTTLE_MS = 100
+let selectionMenuStateGeneration = 0
 
 export const useEditorStore = defineStore('editor', {
   state: (): EditorState => ({
@@ -1495,8 +1496,13 @@ export const useEditorStore = defineStore('editor', {
 
       const fileId = this.currentFile?.id
       if (fileId) {
-        sendSelectionMenuState(fileId, changes)
+        sendSelectionMenuState(fileId, changes, selectionMenuStateGeneration)
       }
+    },
+
+    CANCEL_SELECTION_MENU_STATE(): void {
+      selectionMenuStateGeneration++
+      sendSelectionMenuState.cancel()
     },
 
     // Persist the caret for a tab without the heavy content-change pipeline. A
@@ -1935,18 +1941,27 @@ const createApplicationMenuState = ({
   return state
 }
 
-const sendSelectionMenuState = trailingThrottle((fileId: string, changes: SelectionChange) => {
-  const editorStore = useEditorStore()
-  const preferencesStore = usePreferencesStore()
-  if (preferencesStore.sourceCode || editorStore.currentFile?.id !== fileId) return
+const sendSelectionMenuState = trailingThrottle(
+  (fileId: string, changes: SelectionChange, generation: number) => {
+    const editorStore = useEditorStore()
+    const preferencesStore = usePreferencesStore()
+    if (
+      generation !== selectionMenuStateGeneration ||
+      preferencesStore.sourceCode ||
+      editorStore.currentFile?.id !== fileId
+    ) {
+      return
+    }
 
-  const { windowId } = window.marktext?.env ?? { windowId: -1 }
-  window.electron.ipcRenderer.send(
-    'mt::editor-selection-changed',
-    windowId,
-    createApplicationMenuState(changes)
-  )
-}, SELECTION_MENU_IPC_THROTTLE_MS)
+    const { windowId } = window.marktext?.env ?? { windowId: -1 }
+    window.electron.ipcRenderer.send(
+      'mt::editor-selection-changed',
+      windowId,
+      createApplicationMenuState(changes)
+    )
+  },
+  SELECTION_MENU_IPC_THROTTLE_MS
+)
 
 /**
  * Creates a object that contains the formats selection state.

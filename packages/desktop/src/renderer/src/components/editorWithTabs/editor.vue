@@ -769,6 +769,7 @@ watch(
   sourceCode,
   (value, oldValue) => {
     if (value && value !== oldValue) {
+      editorStore.CANCEL_SELECTION_MENU_STATE()
       contentChangeDispatcher?.flush()
       if (editor.value) {
         editor.value.hideAllFloatTools()

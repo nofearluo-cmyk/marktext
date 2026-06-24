@@ -26,4 +26,5 @@
 ## 任务更新 2026-06-24
 - [x] MarkText Smoothness Phase 1 Task 3 — 关联 R-004 — 已完成: WYSIWYG `json-change` 即时路径仅更新 markdown/cursor/synthetic history/save-dirty 状态, wordCount/TOC/blocks 延后到用户空闲约 150ms 后更新; 已新增单元测试与 E2E 覆盖; 验证通过: `pnpm -C packages/desktop exec vitest run test/unit/specs/deferred-content-change.spec.ts`, `pnpm -C packages/desktop exec playwright test test/e2e/editor-derived-content.spec.ts test/e2e/editor-input.spec.ts test/e2e/tabs.spec.ts`, `pnpm run typecheck`。
 - [x] MarkText Smoothness Phase 1 final verification — 关联 R-004 — 已完成:聚焦 Vitest、聚焦 Playwright、`pnpm run typecheck`、`pnpm run lint` 通过; lint 仍有 77 个既有 warning。
+- [x] MarkText Smoothness Phase 1 review follow-up — 关联 R-004 — 已完成:修复 source-mode 进入时 pending selection 菜单 IPC 失效问题,新增 `selection-menu-state.spec.ts`; 清理 `docs/requirements.md` 尾随空白。重复 derived 计算风险保留到 Phase 2 评估。
 - 下一步: 评估 Phase 2 backlog:文件流式读取、macOS watcher 原生事件、getState 深拷贝削减。

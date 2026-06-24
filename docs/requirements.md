@@ -14,7 +14,7 @@
 ## R-002 [需求名]
 - 描述:
 - 验收标准:
-  - [ ] 
+  - [ ]
 - 状态:
 - 更新:
 
@@ -31,7 +31,7 @@
 ## R-004 MarkText 流畅度优化 Phase 1
 - 描述:通过源码模式有限 viewport、选择状态 IPC 节流、WYSIWYG 派生数据延后更新,改善 MarkText 日常编辑流畅度。
 - 验收标准:
-  - [x] `pnpm -C packages/desktop exec vitest run test/unit/specs/trailing-throttle.spec.ts test/unit/specs/deferred-content-change.spec.ts` 通过。
+  - [x] `pnpm -C packages/desktop exec vitest run test/unit/specs/trailing-throttle.spec.ts test/unit/specs/deferred-content-change.spec.ts test/unit/specs/selection-menu-state.spec.ts` 通过。
   - [x] `pnpm -C packages/desktop exec playwright test test/e2e/source-viewport.spec.ts test/e2e/selection-ipc-throttle.spec.ts test/e2e/editor-derived-content.spec.ts test/e2e/editor-input.spec.ts test/e2e/view-modes.spec.ts test/e2e/menu-sanity.spec.ts` 通过。
   - [x] `pnpm run typecheck` 通过。
 - 状态:已交付
