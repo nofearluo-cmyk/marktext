@@ -105,6 +105,14 @@ interface ContentChangePayload {
   blocks?: unknown
 }
 
+interface DerivedContentChangePayload {
+  id: string
+  markdown: string
+  wordCount?: IFileState['wordCount']
+  toc?: TocItem[]
+  blocks?: unknown
+}
+
 interface SelectionChange {
   start: { key: string; offset: number; block?: { text?: string; functionType?: string }; type?: string }
   end: { key: string; offset: number; block?: { functionType?: string }; type?: string }
@@ -1401,6 +1409,41 @@ export const useEditorStore = defineStore('editor', {
         // Check here is to prevent it from overriding a restored .isSaved state
         tab.isSaved = true // An undo can trigger this
       }
+      debouncedSendBufferedState()
+    },
+
+    UPDATE_DERIVED_CONTENT_STATE({
+      id,
+      markdown,
+      wordCount,
+      toc,
+      blocks
+    }: DerivedContentChangePayload): void {
+      if (!id) {
+        throw new Error('Update derived document content but id was not set!')
+      } else if (this.tabs.length === 0) {
+        return
+      } else if (!(id in this.tabIdToIndex)) {
+        return
+      }
+
+      const index = this.tabIdToIndex[id]
+      if (index == null) return
+      const tab = this.tabs[index]
+      if (!tab) return
+
+      const incomingMarkdown = adjustTrailingNewlines(markdown, tab.trimTrailingNewline)
+      const currentMarkdown = adjustTrailingNewlines(tab.markdown, tab.trimTrailingNewline)
+      if (incomingMarkdown !== currentMarkdown) return
+
+      if (wordCount !== undefined) tab.wordCount = wordCount
+      if (blocks !== undefined) tab.blocks = blocks
+
+      if (id === this.currentFile?.id && toc !== undefined && !equal(toc, this.listToc)) {
+        this.listToc = toc
+        this.toc = listToTree<TocItem>(toc)
+      }
+
       debouncedSendBufferedState()
     },
 
