@@ -36,3 +36,12 @@
   - [x] `pnpm run typecheck` 通过。
 - 状态:已交付
 - 更新:2026-06-24
+
+## R-005 Windows x64 可分发安装包
+- 描述:基于当前本地 workspace 构建 Windows x64 NSIS 安装包,用于分发安装。
+- 验收标准:
+  - [x] `pnpm run build:win` 通过。
+  - [x] 生成 `dist/marktext-win-x64-0.20.0-dev-setup.exe`。
+  - [x] 记录安装包 SHA256。
+- 状态:已交付
+- 更新:2026-06-24

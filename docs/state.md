@@ -3,7 +3,7 @@
 > 权威来源:项目当前进展、在做什么、还剩什么以本文件为准。
 > 每轮开工先读,收尾必回写。这是跨会话的真相,不要凭记忆复述。
 >
-> 最后更新:2026-06-24 / MarkText Smoothness Phase 1 final verification
+> 最后更新:2026-06-24 / Windows x64 installer build completed
 
 ## 进行中
 - [ ] [任务] — 关联 R-00X — 进展:[做到哪了] — 下一步:[具体动作]
@@ -13,6 +13,7 @@
 - [ ] MarkText 流畅度优化 Phase 2 — 关联 R-004 — 备注:评估文件流式读取、macOS watcher 原生事件、getState 深拷贝削减
 
 ## 已完成 (最近)
+- [x] 构建 Windows x64 可分发安装包 — 关联 R-005 — 2026-06-24 — 产物:`dist/marktext-win-x64-0.20.0-dev-setup.exe`
 - [x] MarkText 流畅度优化 Phase 1: 源码模式有限 viewport、选择 IPC 节流、WYSIWYG 派生数据延迟计算 — 关联 R-004 — 2026-06-24
 - [x] 写入 MarkText 流畅度优化 Phase 1 可执行计划 — 关联 R-004 — 2026-06-24 — 文档:`docs/superpowers/plans/2026-06-24-marktext-smoothness-phase1.md`
 - [x] 评估 MarkText 性能优化空间,确认已有性能路线图与源码热点基本吻合 — 关联 R-004 — 2026-06-24
@@ -27,4 +28,5 @@
 - [x] MarkText Smoothness Phase 1 Task 3 — 关联 R-004 — 已完成: WYSIWYG `json-change` 即时路径仅更新 markdown/cursor/synthetic history/save-dirty 状态, wordCount/TOC/blocks 延后到用户空闲约 150ms 后更新; 已新增单元测试与 E2E 覆盖; 验证通过: `pnpm -C packages/desktop exec vitest run test/unit/specs/deferred-content-change.spec.ts`, `pnpm -C packages/desktop exec playwright test test/e2e/editor-derived-content.spec.ts test/e2e/editor-input.spec.ts test/e2e/tabs.spec.ts`, `pnpm run typecheck`。
 - [x] MarkText Smoothness Phase 1 final verification — 关联 R-004 — 已完成:聚焦 Vitest、聚焦 Playwright、`pnpm run typecheck`、`pnpm run lint` 通过; lint 仍有 77 个既有 warning。
 - [x] MarkText Smoothness Phase 1 review follow-up — 关联 R-004 — 已完成:修复 source-mode 进入时 pending selection 菜单 IPC 失效问题,新增 `selection-menu-state.spec.ts`; 清理 `docs/requirements.md` 尾随空白。重复 derived 计算风险保留到 Phase 2 评估。
+- [x] Windows x64 installer build — 关联 R-005 — 已完成:`pnpm run build:win` 成功,生成 NSIS 安装包和 zip; 安装包 SHA256: `42BA5EFC27A74E64FCAA12F03037BF63484A7180659A6DC3A2025137F84213B1`; 本地构建未配置数字签名证书。
 - 下一步: 评估 Phase 2 backlog:文件流式读取、macOS watcher 原生事件、getState 深拷贝削减。
