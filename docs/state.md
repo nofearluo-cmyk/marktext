@@ -3,10 +3,9 @@
 > 权威来源:项目当前进展、在做什么、还剩什么以本文件为准。
 > 每轮开工先读,收尾必回写。这是跨会话的真相,不要凭记忆复述。
 >
-> 最后更新:2026-10-08 / GitHub 代码提交准备中
+> 最后更新:2026-10-08 / GitHub 代码提交完成
 
 ## 进行中
-- [ ] GitHub 提交 — 关联 R-010 — 已创建 `nofearluo-cmyk/marktext` Fork;准备提交当前源码及测试到 `codex/chinese-menu-performance`;下一步:上传并验证 Git tree。
 - [ ] [任务] — 关联 R-00X — 进展:[做到哪了] — 下一步:[具体动作]
 
 ## 待办 (backlog)
@@ -14,6 +13,8 @@
 - [ ] MarkText 流畅度优化 Phase 2 — 关联 R-004 — 备注:评估文件流式读取、macOS watcher 原生事件、getState 深拷贝削减
 
 ## 已完成 (最近)
+- [x] GitHub 提交 — 关联 R-010 — 2026-10-08 — 已推送至 `https://github.com/nofearluo-cmyk/marktext/tree/codex/chinese-menu-performance`;远程源码提交 `1fbbd5d31444eb1218fe05c633d6cda22dd21855` 与本地 HEAD 完全一致,保留原有提交历史。`origin` 保留官方仓库,新增 `github` 指向个人 Fork;依赖、安装包及运行时缓存未纳入提交。
+- 验证:R-010 提交前桌面聚焦单测 26 项、Muya 大文件单测 6 项及 `pnpm run typecheck` 通过;提交差异空白检查通过。下一步:本轮无进行中事项,性能 Phase 2 仍在 backlog。
 - [x] 最新中文菜单版双平台安装包 — 关联 R-005 / R-007 / R-008 / R-009 — 2026-09-23 — 目录:`dist/release-20260923/`;Windows x64 NSIS 安装包和 ZIP,macOS arm64 DMG 和 ZIP。包含中文默认语言、横向菜单与导航栏背景隔离修复。旧安装包保留。
 - 验证:Windows/macOS 打包后应用启动、测试文档显示、中文菜单、ced/keytar/native-keymap 加载全部通过;Windows 横向菜单与不透明背景检查通过,ZIP 内 app.asar 与验证过的应用一致;Mac codesign --verify --deep --strict、hdiutil verify 通过。Mac 15 项相关单测通过;键盘单测增加监听挂载后 1ms 等待,消除 Vue 同毫秒冒泡事件过滤导致的跨平台测试偶发失败,Windows 复测通过。两端同步源码快照 1642 文件校验一致。
 - SHA256:Windows EXE `c61c9c439b1a05ab2797b707b07402c47ded91674794e839907c640b02b99443`;Windows ZIP `090114dc4f905dc2a1184d2c9c268cd3755d5c755aba3f24cc9440c8748bc7b2`;Mac DMG `b03a2f2a972c4d31c1d296c20af624cf0f6e58d0b212785f13b862fe8189b22d`;Mac ZIP `42ae677b0f04f9d012d16e18949ee6f8a5427cc0de65768e0add5a93fcd4fc2c`。校验清单:`dist/release-20260923/SHA256SUMS.txt`。
