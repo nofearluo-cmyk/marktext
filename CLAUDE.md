@@ -236,8 +236,11 @@ main process  (packages/desktop/src/main/)
 
 preload  (packages/desktop/src/preload/)
   ├── Bridge between main and renderer
-  ├── Note: editor and preferences windows use contextIsolation: false +
-  │   nodeIntegration: true (see packages/desktop/src/main/config.js)
+  ├── Both editor and preferences windows run with full sandboxing:
+  │   contextIsolation: true, sandbox: true, nodeIntegration: false
+  │   (see packages/desktop/src/main/config.ts)
+  ├── All Node/Electron access flows through the typed contextBridge
+  │   surface (window.electron.*, window.fileUtils.*, etc.)
   └── Compiled to CommonJS
 
 renderer  (packages/desktop/src/renderer/)
@@ -286,6 +289,7 @@ See `packages/website/content/docs/dev/IPC.md` for conventions and examples.
   - `common` → `packages/desktop/src/common`
   - `@shared` → `packages/desktop/src/shared`
   - `muya` → `../muyajs` (i.e. `packages/muyajs`). Renderer-side imports therefore look like `muya/lib/...` (the alias) — the workspace dep `@marktext/muyajs` is declared in `packages/desktop/package.json` so module resolution stays inside the workspace.
+  - `path` → `pathe` (renderer only). The sandboxed renderer has no access to Node's `path` module, so `pathe` is substituted at build time. It always uses `/` separators and handles Windows drive letters correctly.
 - **Workspace deps**: muya's own npm runtime deps (`github-markdown-css`, `katex`, `dompurify`, `snabbdom`, …) are declared in `packages/muyajs/package.json` so Node module resolution from `packages/muyajs/lib/*.js` finds them inside the workspace rather than walking out to a parent directory.
 - **Patches**: `patch-package` patches live at `packages/desktop/patches/`. The root `postinstall` calls patch-package with `cwd=packages/desktop` so the path resolves correctly.
 

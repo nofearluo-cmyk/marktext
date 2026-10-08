@@ -27,6 +27,15 @@ describe('renderer i18n language loading', () => {
     delete win.i18nUtils
   })
 
+  it('starts with Simplified Chinese menus without an IPC load', async() => {
+    const { t, setLanguage, getCurrentLanguage } = await import('../../../src/renderer/src/i18n')
+
+    expect(getCurrentLanguage()).to.equal('zh-CN')
+    expect(t('menu.file.file')).to.equal('文件')
+    setLanguage('zh-CN')
+    expect(win.i18nUtils!.loadTranslations).not.toHaveBeenCalled()
+  })
+
   it('does not reload the default English locale', async() => {
     const { setLanguage, getCurrentLanguage } = await import('../../../src/renderer/src/i18n')
 
@@ -39,10 +48,10 @@ describe('renderer i18n language loading', () => {
   it('loads an unavailable locale only once', async() => {
     const { setLanguage } = await import('../../../src/renderer/src/i18n')
 
-    setLanguage('zh-CN')
-    setLanguage('zh-CN')
+    setLanguage('ja')
+    setLanguage('ja')
 
     expect(win.i18nUtils!.loadTranslations).toHaveBeenCalledTimes(1)
-    expect(win.i18nUtils!.loadTranslations).toHaveBeenCalledWith('zh-CN')
+    expect(win.i18nUtils!.loadTranslations).toHaveBeenCalledWith('ja')
   })
 })

@@ -125,7 +125,7 @@ export interface IpcSendChannels {
   'mt::keybinding-debug-dump-keyboard-info': []
   'mt::make-screenshot': []
   'mt::menu::popup': [template: MenuTemplate, position?: MenuPopupPosition]
-  'mt::menu::popup-application': [position?: MenuPopupPosition]
+  'mt::menu::popup-application': [position?: MenuPopupPosition, menuIndex?: number]
   'mt::open-file': [filePath: string, options?: unknown]
   'mt::open-file-by-window-id': [windowId: number, filePath: string, options?: unknown]
   'mt::open-keybindings-config': []

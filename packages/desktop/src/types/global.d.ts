@@ -55,6 +55,7 @@ declare global {
   }
 
   interface ElectronWebFrameAPI {
+    getZoomFactor(): number
     setZoomFactor(factor: number): void
     setZoomLevel(level: number): void
   }
@@ -74,7 +75,7 @@ declare global {
     isMaximized(): Promise<boolean>
     isFullScreen(): Promise<boolean>
     popupMenu(template: MenuTemplate, position?: MenuPopupPosition): void
-    popupApplicationMenu(position?: MenuPopupPosition): void
+    popupApplicationMenu(position?: MenuPopupPosition, menuIndex?: number): void
   }
 
   interface ElectronAPI {

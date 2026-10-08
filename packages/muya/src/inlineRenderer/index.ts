@@ -5,6 +5,7 @@ import type { ICursor } from '../selection/types';
 import type { IParagraphState, TContainerState, TState } from '../state/types';
 import type { IHighlight, Labels } from './types';
 import logger from '../utils/logger';
+import { h, patch, toVnode } from '../utils/snabbdom';
 import { tokenizer } from './lexer';
 import Renderer from './renderer';
 import { beginRules } from './rules';
@@ -14,6 +15,9 @@ const debug = logger('inlineRenderer:');
 class InlineRenderer {
     public labels: Labels = new Map();
     public renderer: Renderer;
+
+    /** State revision used to build the current reference-definition cache. */
+    private _labelsRevision = -1;
 
     constructor(public muya: Muya) {
         this.renderer = new Renderer(muya, this);
@@ -66,17 +70,40 @@ class InlineRenderer {
             debug.error('Patch can only handle content block');
 
         const tokens = this.tokenizer(block, highlights);
-        const html = this.renderer.output(
+        const children = this.renderer.outputVNodes(
             tokens,
             block,
             cursor && cursor.block === block ? cursor : {},
         );
-        domNode!.innerHTML = html;
+
+        // Snabbdom diff: convert the current live DOM to a VNode, build the
+        // target VNode with the same sel (tag + id + class), and patch only
+        // what changed.  Matching the sel is critical — a mismatch causes
+        // Snabbdom to REPLACE the root element, which invalidates the block's
+        // domNode reference and breaks parent/child navigation.
+        const oldVNode = toVnode(domNode!);
+        const sel = oldVNode.sel ?? domNode!.tagName.toLowerCase();
+        const newVNode = h(
+            sel,
+            { key: oldVNode.key },
+            children,
+        );
+
+        patch(oldVNode, newVNode);
     }
 
     collectReferenceDefinitions() {
-        const state = this.muya.editor.jsonState.getState();
-        const labels = new Map();
+        const { jsonState } = this.muya.editor;
+        const revision = jsonState.getRevision();
+
+        // A document rebuild calls patch once per content block. Check the
+        // lightweight revision before cloning state so all blocks in the same
+        // rebuild share one labels snapshot.
+        if (revision === this._labelsRevision)
+            return;
+
+        const state = jsonState.getState();
+        const labels = new Map<string, NonNullable<ReturnType<typeof this.getLabelInfo>['info']>>();
 
         const travel = (sts: TState[]) => {
             if (Array.isArray(sts) && sts.length) {
@@ -96,6 +123,7 @@ class InlineRenderer {
         travel(state);
 
         this.labels = labels;
+        this._labelsRevision = revision;
     }
 
     getLabelInfo(blockOrState: ParagraphContent | IParagraphState) {

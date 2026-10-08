@@ -3,6 +3,7 @@ import bus from '../bus'
 
 // Directly import translation files
 import enTranslations from '../../../../static/locales/en.json'
+import zhCNTranslations from '../../../../static/locales/zh-CN.json'
 
 // Create the Vue i18n instance.
 // vue-i18n's options type intersection between Composition + Legacy modes is
@@ -10,9 +11,9 @@ import enTranslations from '../../../../static/locales/en.json'
 // at the call site rather than spreading `any` further.
 const i18n = createI18n({
   legacy: false,
-  locale: 'en', // default is en
+  locale: 'zh-CN',
   fallbackLocale: 'en',
-  messages: { en: enTranslations }, // Load en by default only
+  messages: { en: enTranslations, 'zh-CN': zhCNTranslations },
   // Disable linking to avoid '@' symbols being misinterpreted
   modifiers: {
     '@': () => '@'

@@ -62,8 +62,14 @@ export class LinkedList<T extends ILinkedNode> {
         this.length += 1;
     }
 
-    offset(node: T) {
-        return [...this.iterator()].indexOf(node);
+    offset(node: T): number {
+        let i = 0;
+        for (const cur of this.iterator()) {
+            if (cur === node)
+                return i;
+            i++;
+        }
+        return -1;
     }
 
     remove(node: T) {
@@ -85,33 +91,45 @@ export class LinkedList<T extends ILinkedNode> {
         this.length -= 1;
     }
 
-    find(index: number) {
+    find(index: number): Nullable<T> {
         if (index < 0 || index >= this.length)
             return null;
 
-        return [...this.iterator()][index];
+        let i = 0;
+        for (const node of this.iterator()) {
+            if (i === index)
+                return node;
+            i++;
+        }
+        return null;
     }
 
-    forEach(callback: (cur: T, i: number) => void) {
-        return [...this.iterator()].forEach(callback);
+    forEach(callback: (cur: T, i: number) => void): void {
+        let i = 0;
+        for (const node of this.iterator())
+            callback(node, i++);
     }
 
     forEachAt(
         index: number,
         length: number = this.length,
         callback: (cur: T, i: number) => void,
-    ) {
+    ): void {
         const curNode = this.find(index);
+        if (!curNode)
+            return;
 
-        return [...this.iterator(curNode, length)].forEach((node, i) => {
-            callback(node, i + index);
-        });
+        let i = 0;
+        for (const node of this.iterator(curNode, length))
+            callback(node, index + i++);
     }
 
     map<M>(callback: (cur: T, i: number) => M): M[] {
-        return this.reduce((acc: M[], node: T, i: number) => {
-            return [...acc, callback(node, i)];
-        }, []);
+        // Snapshot via spread: callbacks may reparent nodes (which mutates
+        // next/prev and breaks lazy iteration); matching Array.prototype.map
+        // semantics. find/offset/forEach are on the hot path and don't
+        // snapshot because their callbacks are observation-only.
+        return [...this.iterator()].map(callback);
     }
 
     reduce<M>(callback: (memo: M, cur: T, i: number) => M, memo: M): M {

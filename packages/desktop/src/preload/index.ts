@@ -80,6 +80,7 @@ const clipboardAPI = {
 }
 
 const webFrameAPI = {
+  getZoomFactor: () => webFrame.getZoomFactor(),
   setZoomFactor: (factor: number): void => {
     if (typeof factor === 'number' && factor > 0) webFrame.setZoomFactor(factor)
   },
@@ -104,8 +105,8 @@ const windowControlAPI = {
   isFullScreen: () => invoke('mt::win::is-fullscreen'),
   popupMenu: (template: unknown, position?: { x: number; y: number }) =>
     send('mt::menu::popup', template as never, position),
-  popupApplicationMenu: (position?: { x: number; y: number }) =>
-    send('mt::menu::popup-application', position)
+  popupApplicationMenu: (position?: { x: number; y: number }, menuIndex?: number) =>
+    send('mt::menu::popup-application', position, menuIndex)
 }
 
 // These three predicates are pure path-string operations: implementing them

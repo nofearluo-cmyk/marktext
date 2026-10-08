@@ -45,13 +45,7 @@
         </span>
       </div>
       <div :class="showCustomTitleBar ? 'left-toolbar title-no-drag' : 'right-toolbar'">
-        <div
-          v-if="showCustomTitleBar"
-          class="frameless-titlebar-menu title-no-drag"
-          @click.stop="handleMenuClick"
-        >
-          <span class="text-center-vertical">&#9776;</span>
-        </div>
+        <ApplicationMenuBar v-if="showCustomTitleBar" />
         <el-tooltip
           v-if="wordCount"
           class="item"
@@ -145,6 +139,7 @@ import { isOsx as isOsxPlatform } from '@/util'
 import { useEditorStore } from '@/store/editor'
 import { useI18n } from 'vue-i18n'
 import { ArrowRight } from '@element-plus/icons-vue'
+import ApplicationMenuBar from './menuBar.vue'
 import type { FileWordCount } from '@shared/types/files'
 
 interface ProjectInfo {
@@ -266,10 +261,6 @@ const toggleMaxmizeOnMacOS = () => {
 
 const handleMinimizeClick = () => {
   window.electron.windowControl.minimize()
-}
-
-const handleMenuClick = () => {
-  window.electron.windowControl.popupApplicationMenu({ x: 23, y: 20 })
 }
 
 const rename = () => {
@@ -439,6 +430,38 @@ div.title > span {
 .title-no-drag {
   -webkit-app-region: no-drag;
 }
+.title-bar.frameless:not(.isOsx) {
+  display: flex;
+  align-items: center;
+  background: var(--editorBgColor);
+  & .left-toolbar {
+    position: static;
+    order: 0;
+    width: auto;
+    min-width: 0;
+    padding: 0 4px;
+    align-items: center;
+  }
+  & .title {
+    order: 1;
+    flex: 1;
+    min-width: 0;
+    padding: 0 8px;
+    overflow: hidden;
+    & > span {
+      direction: ltr;
+      text-overflow: ellipsis;
+    }
+  }
+  & .right-toolbar {
+    position: static;
+    order: 2;
+    flex: 0 0 138px;
+  }
+}
+@media (max-width: 800px) {
+  .left-toolbar .word-count { display: none; }
+}
 /* frameless window controls */
 .frameless-titlebar-button {
   position: relative;
@@ -452,9 +475,6 @@ div.title > span {
   top: 50%;
   left: 50%;
   transform: translateX(-50%) translateY(-50%);
-}
-.frameless-titlebar-menu {
-  color: var(--sideBarColor);
 }
 .frameless-titlebar-close:hover {
   background-color: rgb(228, 79, 79);

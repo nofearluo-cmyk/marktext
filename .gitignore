@@ -20,3 +20,6 @@ playwright-report/
 .claude/
 .agents/
 .agent/
+
+# Windows runtime cache created when SystemDrive is unavailable
+packages/desktop/%SystemDrive%/

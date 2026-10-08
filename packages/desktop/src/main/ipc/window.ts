@@ -116,13 +116,17 @@ export const registerWindowHandlers = (): void => {
     }
   })
 
-  ipcMain.on('mt::menu::popup-application', (event, position?: MenuPopupPosition) => {
+  ipcMain.on('mt::menu::popup-application', (event, position?: MenuPopupPosition, menuIndex?: number) => {
     const win = windowFromEvent(event)
     if (!win) return
     try {
       const appMenu = Menu.getApplicationMenu()
       if (!appMenu) return
-      appMenu.popup({ window: win, x: position?.x, y: position?.y })
+      // Open the live submenu so checked/enabled states and actions stay in sync.
+      const item = menuIndex === undefined ? undefined : appMenu.items[menuIndex]
+      if (menuIndex !== undefined && (!Number.isInteger(menuIndex) || !item?.enabled || !item.visible)) return
+      const menu = menuIndex === undefined ? appMenu : item?.submenu
+      menu?.popup({ window: win, x: position?.x, y: position?.y })
     } catch (err) {
       log.error('application menu popup failed:', err)
     }

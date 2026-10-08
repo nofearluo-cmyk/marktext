@@ -56,12 +56,12 @@ export class MarkdownToState {
         // markdownToState injects synthetic `block-end` markers (see the
         // blockquote/list/list_item/footnote cases below) to pop the parent
         // stack, so the working stream is wider than what `lexBlock` returns.
-        const tokens: TBlockToken[] = lexBlock(markdown, {
+        const tokenStack: TBlockToken[] = lexBlock(markdown, {
             footnote,
             math,
             frontMatter,
             isGitlabCompatibilityEnabled,
-        });
+        }).reverse();
 
         const states: TState[] = [];
         let token: TBlockToken | undefined;
@@ -69,8 +69,20 @@ export class MarkdownToState {
         let value: string;
         const parentList: TState[][] = [states];
 
+        // The next token lives at the end of the stack, so pop/push are O(1).
+        // Child streams are pushed in reverse order followed by a block-end
+        // marker, preserving the former work queue's traversal order.
+        const pushChildTokens = (
+            childTokens: TBlockToken[],
+            endToken: TBlockToken,
+        ) => {
+            tokenStack.push(endToken);
+            for (let i = childTokens.length - 1; i >= 0; i--)
+                tokenStack.push(childTokens[i]);
+        };
+
         // eslint-disable-next-line no-cond-assign
-        while ((token = tokens.shift())) {
+        while ((token = tokenStack.pop())) {
             switch (token.type) {
                 // Marks the end of the children's traversal and a return to the previous level
                 case 'block-end': {
@@ -259,8 +271,8 @@ export class MarkdownToState {
 
                 case 'text': {
                     value = token.text;
-                    while (tokens[0]?.type === 'text') {
-                        const next = tokens.shift() as Extract<TBlockToken, { type: 'text' }>;
+                    while (tokenStack[tokenStack.length - 1]?.type === 'text') {
+                        const next = tokenStack.pop() as Extract<TBlockToken, { type: 'text' }>;
                         value += `\n${next.text}`;
                     }
                     state = {
@@ -288,8 +300,10 @@ export class MarkdownToState {
                     };
                     parentList[0].push(state);
                     parentList.unshift(state.children);
-                    tokens.unshift({ type: 'block-end', tokenType: 'blockquote' });
-                    tokens.unshift(...(token.tokens as TBlockToken[]));
+                    pushChildTokens(token.tokens as TBlockToken[], {
+                        type: 'block-end',
+                        tokenType: 'blockquote',
+                    });
                     break;
                 }
 
@@ -334,8 +348,10 @@ export class MarkdownToState {
                     state = listState;
                     parentList[0].push(state);
                     parentList.unshift(state.children);
-                    tokens.unshift({ type: 'block-end', tokenType: 'list' });
-                    tokens.unshift(...(token.items as TBlockToken[]));
+                    pushChildTokens(token.items as TBlockToken[], {
+                        type: 'block-end',
+                        tokenType: 'list',
+                    });
                     break;
                 }
 
@@ -359,8 +375,10 @@ export class MarkdownToState {
                     state = itemState;
                     parentList[0].push(state);
                     parentList.unshift(state.children);
-                    tokens.unshift({ type: 'block-end', tokenType: 'list-item' });
-                    tokens.unshift(...(token.tokens as TBlockToken[]));
+                    pushChildTokens(token.tokens as TBlockToken[], {
+                        type: 'block-end',
+                        tokenType: 'list-item',
+                    });
                     break;
                 }
 
@@ -398,8 +416,10 @@ export class MarkdownToState {
                     };
                     parentList[0].push(state);
                     parentList.unshift(state.children);
-                    tokens.unshift({ type: 'block-end', tokenType: 'footnote' });
-                    tokens.unshift(...(token.tokens as TBlockToken[]));
+                    pushChildTokens(token.tokens as TBlockToken[], {
+                        type: 'block-end',
+                        tokenType: 'footnote',
+                    });
                     break;
                 }
 

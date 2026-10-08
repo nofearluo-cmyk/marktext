@@ -156,22 +156,35 @@ class Renderer {
     }
 
     output(tokens: Token[], block: Format, cursor: ICursor) {
-        const children: VNode[] = tokens.reduce(
-            (acc, token) => [
-                ...acc,
+        const children = this._buildVNodes(tokens, block, cursor);
+        const vNode = h('span', children);
+        const rawHtml = toHTML(vNode);
+
+        return rawHtml.replace(/^<span>([\s\S]*)<\/span>$/g, (_, p) => p);
+    }
+
+    /**
+     * Return VNodes directly for Snabbdom patch, bypassing the HTML string
+     * round-trip.  The caller is responsible for wrapping with the container's
+     * tag type and applying the diff through `patch(oldVNode, newVNode)`.
+     */
+    outputVNodes(tokens: Token[], block: Format, cursor: ICursor): VNode[] {
+        return this._buildVNodes(tokens, block, cursor);
+    }
+
+    private _buildVNodes(tokens: Token[], block: Format, cursor: ICursor): VNode[] {
+        const children: VNode[] = [];
+        for (const token of tokens) {
+            children.push(
                 ...this.dispatch(snakeToCamel(token.type), {
                     h,
                     cursor,
                     block,
                     token,
                 }),
-            ],
-            [] as VNode[],
-        );
-        const vNode = h('span', children);
-        const rawHtml = toHTML(vNode);
-
-        return rawHtml.replace(/^<span>([\s\S]*)<\/span>$/g, (_, p) => p);
+            );
+        }
+        return children;
     }
 }
 
